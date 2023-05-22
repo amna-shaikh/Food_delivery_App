@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../screens/home_screens/home_screen/home_screen.dart';
+import '../screens/home/home_screen.dart';
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
 
@@ -69,8 +69,8 @@ class _SignInState extends State<SignIn> {
                        SignInButton(
                          Buttons.Google,
                          text: "Sign up with Google",
-                         onPressed: () {
-                           _googleSignUp().then(
+                         onPressed: () async {
+                         await  _googleSignUp().then(
                                (value) => Navigator.of(context).pushReplacement(
                                MaterialPageRoute(builder: (context) => HomeScreen()
                                ), ),
