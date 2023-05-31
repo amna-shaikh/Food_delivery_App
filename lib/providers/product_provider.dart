@@ -6,14 +6,17 @@ import '../Models/product_model.dart';
 class ProductProvider with ChangeNotifier {
 
   late ProductModel productModel;
+  List<ProductModel> search = [];
   productModels(QueryDocumentSnapshot element) {
     productModel = ProductModel(
-      productImage: element.get("productImage"),
-      productName: element.get("productName"),
-      productPrice: element.get("productPrice"),
+      productImage: element.get("ProductImage"),
+      productName: element.get("ProductName"),
+      productPrice: element.get("ProductPrice"),
+      productId: element.get("ProductId"),
+        productUnit: element.get("ProductUnit")
 
     );
-
+    search.add(productModel);
   }
 
   List<ProductModel> FruitProductList = [];
@@ -65,5 +68,9 @@ class ProductProvider with ChangeNotifier {
   List<ProductModel>  get getPoultryProductDataList {
     return PoultryProductList;
 }
-
+  List<ProductModel> get getAllProductSearch {
+    return search;
   }
+}
+
+

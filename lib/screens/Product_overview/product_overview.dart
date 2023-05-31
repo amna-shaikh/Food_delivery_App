@@ -1,13 +1,24 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:food_delivery/Models/product_model.dart';
 import 'package:food_delivery/constants/colors.dart';
+import 'package:food_delivery/providers/wishlist_provider.dart';
+import 'package:food_delivery/screens/Review_cart/review_cart.dart';
+import 'package:provider/provider.dart';
+import '../../widgets/count.dart';
 enum signchar{fill , outline}
 class ProductOverview extends StatefulWidget {
  final String ProductName;
  final String ProductImage;
  final int ProductPrice;
+ final String productId;
    ProductOverview({
-    required this.ProductName , required this.ProductImage, required this.ProductPrice
+    required this.ProductName ,
+     required this.ProductImage,
+     required this.ProductPrice,
+     required this.productId
 });
   @override
   State<ProductOverview> createState() => _ProductOverviewState();
@@ -19,41 +30,82 @@ class _ProductOverviewState extends State<ProductOverview> {
     required Color backgroundColor  ,
     required Color color ,
     required String title ,
-    required IconData iconData}){
-return Expanded(child: Container(
-  padding: EdgeInsets.all(20),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Icon(iconData ,size: 17, color: iconColor,),
-      SizedBox(width: 5,),
-      Text(title, style: TextStyle(color: color),)
-    ],
+    required IconData iconData,
+    required VoidCallback onTap
+  }){
+return Expanded(child: GestureDetector(
+  onTap: onTap,
+  child:   Container(
+    padding: EdgeInsets.all(20),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(iconData ,size: 20, color: iconColor,),
+        SizedBox(width: 5,),
+        Text(title, style: TextStyle(color: color),)
+      ],
+    ),
   ),
 ));
   }
-  @override
+  bool WishList = false;
+
+  getwishListbool(){
+    FirebaseFirestore.instance.collection("WishList").doc(FirebaseAuth.instance.currentUser?.uid)
+        .collection("YourWishList").doc(widget.productId).get().then((value) => {
+          if(this.mounted){
+            if(value.exists){
+            setState((){
+              WishList = value.get("iswishlist");
+
+    })}
+          }
+    });
+  }
   Widget build(BuildContext context) {
+    WishListProvider wishListProvider = Provider.of(context);
+    getwishListbool();
     return Scaffold(
       bottomNavigationBar: Row(
         children: [
           bottomNavigatorbar(
-            backgroundColor: textColor,
-            color: Colors.white70,
-            iconColor: Colors.grey,
-            title: "Add to WishList",
-            iconData: Icons.favorite_border
+            backgroundColor: Colors.green,
+            color: Colors.black,
+            iconColor: Colors.black,
+            title: "Add to wishList",
+            iconData: WishList == false ? Icons.favorite_border : Icons.favorite,
+            onTap: (){
+              setState(() {
+                WishList = !WishList;
+              });
+              if(WishList){
+                wishListProvider.addWishListData(
+                    wishlistId: widget.productId,
+                    wishlistname: widget.ProductName,
+                    wishlistimage:widget.ProductImage,
+                    wishlistprice:widget.ProductPrice ,
+                    wishlistquantity: 2,
+                    );
+              }
+              else{
+                wishListProvider.deleteWishtList(widget.productId);
+              }
+            }
           ),
           bottomNavigatorbar(
-              backgroundColor: primaryColor,
-              color:textColor,
-              iconColor: Colors.white70,
+              backgroundColor: Colors.black,
+              color:Colors.white,
+              iconColor: Colors.white,
               title: "Go to Cart",
-              iconData: Icons.shopping_cart_checkout
+              iconData: Icons.shopping_cart_checkout,
+            onTap: (){
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => ReviewCart()));
+            }
           ),
         ],
       ),
       appBar: AppBar(
+        backgroundColor: Colors.green,
         iconTheme: IconThemeData(
           color: textColor,
         ),
@@ -69,7 +121,7 @@ return Expanded(child: Container(
                   children: [
                     ListTile(
                       title: Text(widget.ProductName ?? ""),
-                      subtitle: Text("\$${widget.ProductPrice}"),
+                      subtitle: Text("Rs. ${widget.ProductPrice}"),
                     ),
                     Container(
                       height: 250,
@@ -104,22 +156,14 @@ return Expanded(child: Container(
                                 activeColor: Colors.green[700],)
                             ],
                           ),
-                          Text("\&50"),
-                          /*Container(
-                            padding: EdgeInsets.symmetric(horizontal: 30 , vertical: 10),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(30)
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.add , size:17 , color: primaryColor,),
-                                Text("Add", style: TextStyle(color: primaryColor),
-                                )
-                              ],
-                            ),
-                          )*/
+                          Text("Rs. ${widget.ProductPrice}"),
+                          Count( productId: widget.productId,
+                            productImage: widget.ProductImage,
+                            productName: widget.ProductName,
+                            productPrice: widget.ProductPrice,
+                            productUnit: "500 Gram",
+                            //productUnit:  widget.P,
+                            )
                         ],
                       ),
                     )
@@ -135,12 +179,12 @@ return Expanded(child: Container(
               children: [
                 Text("About this Product" , style: TextStyle(fontSize: 18 , fontWeight: FontWeight.w600),),
                 SizedBox(height: 10,),
-                Text("About this Product" , style: TextStyle(fontSize: 16 , color: textColor),),
-
+                Text("A grocery store is another form of retailing, primarily focusing on selling food,"
+                    " along with non-food household products, such as bathroom or cleaning products,"
+                    " to their consumers." , style: TextStyle(fontSize: 16 , color: textColor),),
               ],
             ),
           ))
-          
         ],
       ),
     );

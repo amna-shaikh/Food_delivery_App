@@ -1,17 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:food_delivery/providers/user_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 
 import '../screens/home/home_screen.dart';
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
-
   @override
   State<SignIn> createState() => _SignInState();
 }
 
 class _SignInState extends State<SignIn> {
+  late UserProvider userProvider;
   _googleSignUp() async {
     try {
       final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -30,6 +33,11 @@ class _SignInState extends State<SignIn> {
 
       final User? user = (await _auth.signInWithCredential(credential)).user;
       // print("signed in " + user.displayName);
+      userProvider.AddUserDetails(
+          currentuser: user!,
+          username: user.displayName!,
+          userimage: user.photoURL!,
+          useremail: user.email!);
 
       return user;
     } catch (e) {
@@ -39,6 +47,7 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
+    userProvider = Provider.of<UserProvider>(context);
     return Scaffold(
       body: Container(
         height: double.infinity,
@@ -58,11 +67,16 @@ class _SignInState extends State<SignIn> {
                child: Column(
                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                  children: [
-                   Text("Sign in to continue"),
-                   Text("Food App" , style: TextStyle(
-                     fontSize: 30,
-                     fontWeight: FontWeight.w700
-                   ),),
+                   Text("Sign in to continue" , style: GoogleFonts.poppins(
+                   fontSize: 28,
+                   fontWeight: FontWeight.w700
+               )),
+
+                   Text("Shop Now" ,
+                     style: GoogleFonts.poppins(
+                         fontSize: 28,
+                         fontWeight: FontWeight.w700
+                     )),
 
                    Column(
                      children: [
@@ -88,8 +102,15 @@ class _SignInState extends State<SignIn> {
 
                  Column(
                    children: [
-                     Text("By signing this your are agreeing to our"),
-                     Text("Terms and Policy")],
+                     Text("By signing this your are agreeing to our",  style: GoogleFonts.poppins(
+                     fontSize: 18,
+                     fontWeight: FontWeight.w700
+                 )),
+
+                     Text("Terms and Policy", style: GoogleFonts.poppins(
+                         fontSize: 18,
+                         fontWeight: FontWeight.w700
+                     ))],
                  ),
 ] ),
 

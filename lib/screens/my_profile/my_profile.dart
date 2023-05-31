@@ -1,37 +1,44 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:food_delivery/constants/colors.dart';
+import 'package:food_delivery/providers/user_provider.dart';
 import 'package:food_delivery/screens/home/drawer_side.dart';
 
-class MyProfile extends StatelessWidget {
-  const MyProfile({Key? key}) : super(key: key);
+class MyProfile extends StatefulWidget {
+  UserProvider userProvider;
+   MyProfile(this.userProvider);
+  @override
+  State<MyProfile> createState() => _MyProfileState();
+}
+class _MyProfileState extends State<MyProfile> {
   Widget listtile({required IconData icon , required String title}){
     return Column(
    children: [
      Divider(height: 1,),
-ListTile(
-leading: Icon(icon),
-title: Text(title),
-trailing: Icon(Icons.arrow_forward_ios),
+      ListTile(
+        leading: Icon(icon),
+         title: Text(title),
+        trailing: Icon(Icons.arrow_forward_ios),
 
 )
     ],
     );
 }
 
-
   @override
   Widget build(BuildContext context) {
+    var userdata = widget.userProvider.currentdata;
     return Scaffold(
       backgroundColor: primaryColor,
       appBar: AppBar(
+        backgroundColor: Colors.green,
         elevation: 0,
         title: Text("My profile" , style: TextStyle(
           fontSize: 18,
           color: textColor
         ),),
       ),
-      drawer: DrawerSide(),
+      drawer: DrawerSide(widget.userProvider),
       body: SingleChildScrollView(
         child: Stack(
           children: [
@@ -62,12 +69,12 @@ trailing: Icon(Icons.arrow_forward_ios),
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("AMNA SHAIKH", style: TextStyle(fontSize: 14,
+                                Text(userdata.userName, style: TextStyle(fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                   color: textColor
                                 ),),
                                 SizedBox(height: 10,),
-                                Text("amnashaikh090@gmail.com")
+                                Text(userdata.userEmail)
                               ],
                             ),
                             CircleAvatar(
@@ -87,7 +94,7 @@ trailing: Icon(Icons.arrow_forward_ios),
                     listtile(icon:Icons.file_copy_outlined, title: "Terms and Conditions"),
                     listtile(icon:Icons.privacy_tip, title: "Privacy Policy"),
                     listtile(icon:Icons.add_chart, title: "About"),
-                    listtile(icon:Icons.exit_to_app_outlined, title: "Log Out"),
+                  //  listtile(icon:Icons.exit_to_app_outlined, title: "Log Out"),
                   ],
                 ),
               )
@@ -104,7 +111,7 @@ trailing: Icon(Icons.arrow_forward_ios),
                 child: CircleAvatar(
                  radius: 45,
                   backgroundColor: scaffoldBackgroundColor,
-                  backgroundImage: AssetImage(""),
+                  backgroundImage:NetworkImage(userdata.userImage ?? ""),
                 ),
               ),
             )
